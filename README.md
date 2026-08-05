@@ -11,16 +11,17 @@ Built with **[Grok Build](https://x.ai)** (xAI).
 
 ---
 
-## Why FARTING-WHISPER?
+## Why this was built
 
-| Option | Problem |
-|--------|---------|
-| **Win + H** (Windows dictation) | Needs internet / Microsoft cloud services. Unreliable on ships, satcom, or offline machines. |
-| **OpenAI Whisper / faster-whisper** | Heavy stack, often wants a **CUDA** GPU, high resource use, painful setup for simple live typing. |
-| **FARTING-WHISPER** | **Kroko TR-128L** streaming ASR via **Sherpa-ONNX** on **CPU**. Local model, hold-to-talk, inject into any window. |
+At sea, speech tools fall apart.
 
-This project exists because those options were a bad fit for real offline / low-resource use.  
-ASR model in this repo: **Kroko Turkish + English** (`model/kroko-tr-128l/`). Other Sherpa/Kroko language packs can replace that folder if you want.
+- **Win + H** leans on Microsoft / Azure cloud. Bad satcom, no link, or blocked traffic → dictation dies.  
+- **Whisper / faster-whisper** often want **CUDA**, heavy RAM/VRAM, and a long install fight — not something you want to debug mid-voyage.  
+- Commercial “smart” ASR assumes office Wi‑Fi, not a ship.
+
+**FARTING-WHISPER** is a small local answer: **Kroko TR-128L** (Turkish + English) via **Sherpa-ONNX** on **CPU**, hold-to-talk, type into any focused window. Built because shipboard ASR needed to **just work offline**.
+
+Other Sherpa/Kroko language packs can replace `model/kroko-tr-128l/` if you need another language.
 
 ---
 
@@ -41,7 +42,7 @@ git clone https://github.com/netertua/FARTING-WHISPER.git
 cd FARTING-WHISPER
 ```
 
-If `model/kroko-tr-128l/*.onnx` files are tiny pointers after clone, run:
+If `model/kroko-tr-128l/*.onnx` files look like tiny pointers after clone:
 
 ```bat
 git lfs pull
@@ -65,7 +66,7 @@ Or:
 python -m app.stt_app
 ```
 
-Debug (console window):
+Debug (console):
 
 ```bat
 run-debug.bat
@@ -77,7 +78,7 @@ run-debug.bat
 2. **Hold F11** and speak.  
 3. **Release F11** — recording stops; remaining audio is flushed and typed.
 
-Tray icon: show window, restart engine, quit.
+Tray: show window, restart engine, quit.
 
 ---
 
@@ -106,7 +107,15 @@ Upstream (Sherpa-ONNX, Kroko weights, pip packages) keep their own licenses.
 
 ---
 
-## Credits
+## Authors & credits
 
-- **Kroko TR-128L** + **Sherpa-ONNX** — on-device ASR  
-- **Grok Build** (xAI) — used to build this project  
+| | |
+|--|--|
+| **Idea owner / author** | **Capt. Can Yapıcı** ([@netertua](https://github.com/netertua)) |
+| **Collaboration & programming** | **Cansu Yapıcı** ([@netertuas-sissy](https://github.com/netertuas-sissy)) |
+| **Build tooling** | [Grok Build](https://x.ai) (xAI) |
+| **ASR** | Kroko TR-128L + Sherpa-ONNX |
+
+---
+
+**FARTING-WHISPER** — offline CPU speech-to-text for places the cloud does not reach.
