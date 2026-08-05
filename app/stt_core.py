@@ -108,11 +108,13 @@ class SttCore:
             preferred_mic=stream.get("preferredMic") or "",
             flush_timeout_s=float(stream.get("flushTimeoutS", 20)),
         )
+        # charDelayMs: per-keystroke pause so text streams like typing, not block paste
+        delay_ms = int(inj.get("charDelayMs", 18))
         self.injector = Injector(
             live_stream=True,
             smart_paste_console=False,
             force_smart_paste=False,
-            char_delay_ms=0,
+            char_delay_ms=max(0, delay_ms),
             prefer_grok=False,
         )
         self.injector.ensure_type_worker()
