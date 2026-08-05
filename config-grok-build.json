@@ -30,8 +30,8 @@
     "forceSmartPaste": false,
     "preferGrok": false,
     "autoEnter": false,
-    "charDelayMs": 0,
-    "note": "PC-wide: mouse click target or foreground. Never force Grok."
+    "charDelayMs": 18,
+    "note": "charDelayMs = typewriter pace (ms per char). 12=fast, 18=normal stream, 28=slow. 0=instant chunks."
   },
   "grok": {
     "mode": false,
