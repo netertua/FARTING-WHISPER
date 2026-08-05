@@ -455,26 +455,22 @@ class Injector:
         self._send_unicode_chars(text)
 
     def _send_unicode_chars(self, text: str) -> None:
-        """Spectre / C# LivePaste style: KEYEVENTF_UNICODE per character."""
-        batch: list[INPUT] = []
+        """
+        KEYEVENTF_UNICODE one character at a time.
+        char_delay_ms > 0 → typewriter / AI-stream feel (pıt pıt), not block dumps.
+        """
+        delay = max(0, int(self.char_delay_ms)) / 1000.0
         for ch in text:
             if ch == "\r":
                 continue
             if ch == "\n":
-                batch.append(self._key_vk(VK_RETURN, True))
-                batch.append(self._key_vk(VK_RETURN, False))
+                self._send_inputs(
+                    [self._key_vk(VK_RETURN, True), self._key_vk(VK_RETURN, False)]
+                )
             else:
-                batch.extend(self._unicode_char(ch))
-            # smaller batches = more stream-like feel
-            if len(batch) >= 16:
-                self._send_inputs(batch)
-                batch.clear()
-                if self.char_delay_ms:
-                    time.sleep(self.char_delay_ms / 1000.0)
-        if batch:
-            self._send_inputs(batch)
-            if self.char_delay_ms:
-                time.sleep(self.char_delay_ms / 1000.0)
+                self._send_inputs(self._unicode_char(ch))
+            if delay > 0:
+                time.sleep(delay)
 
     def _smart_paste(self, text: str) -> None:
         """Clipboard + Ctrl+V (Superlux ExecuteSmartPaste style), restore clipboard."""
