@@ -1,0 +1,2 @@
+# Kroko ONNX weights exceed GitHub's 100MB soft limit — use Git LFS
+model/**/*.onnx filter=lfs diff=lfs merge=lfs -text

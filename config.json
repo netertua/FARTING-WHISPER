@@ -1,0 +1,38 @@
+{
+  "asr": {
+    "modelDir": "model/kroko-tr-128l",
+    "sampleRate": 16000,
+    "threads": 4,
+    "provider": "cpu",
+    "providerChain": ["cpu"],
+    "decodingMethod": "greedy_search",
+    "note": "CPU only. NPU not used for ASR."
+  },
+  "streaming": {
+    "decodeIntervalMs": 40,
+    "blocksize": 800,
+    "preferredMic": "",
+    "autoMicDiscover": true
+  },
+  "hotkey": {
+    "kind": "quote_and_start_ptt",
+    "xinputMask": 16,
+    "enableXinput": true,
+    "hardwareAliasVk": 192,
+    "hardwareAliasVks": [192],
+    "swallowAlias": true,
+    "note": "PTT: \" tırnak tuşu (VK_OEM_3=0xC0=192) system-wide + GPD START (XInput). F2 yok. Hold-to-talk live STT tüm PC / Grok."
+  },
+  "inject": {
+    "smartPasteConsole": true,
+    "autoEnter": false,
+    "charDelayMs": 0
+  },
+  "ui": {
+    "desktop": true,
+    "toolkit": "PyQt5",
+    "web": false,
+    "openBrowser": false,
+    "tray": false
+  }
+}

@@ -1,0 +1,38 @@
+FARTING-WHISPER Free Non-Commercial License
+===========================================
+
+Copyright (c) 2026 FARTING-WHISPER authors
+
+Permission is granted to any person to use, copy, modify, and share this
+software and its documentation, free of charge, for personal, educational,
+research, and other non-commercial purposes, subject to the following terms:
+
+1. FREE FOREVER
+   This software is free. You may not charge money for the software itself,
+   for copies of it, for access to it, or for a packaged/redistributed form
+   of it (including “paid downloads”, app-store sales, or “premium” forks
+   that sell the same core app).
+
+2. NO COMMERCIAL SALE / MONETIZATION OF THIS APP
+   You may not sell this software. You may not use this software as a paid
+   product, paid service, paid SaaS, paid installer, or paid subscription.
+   You may not put it behind a paywall.
+
+3. ATTRIBUTION
+   If you redistribute source or binaries, keep this license text and credit
+   FARTING-WHISPER in a reasonable place (README, about box, or equivalent).
+
+4. NO WARRANTY
+   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+   THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+   FROM THE SOFTWARE OR ITS USE.
+
+5. UPSTREAM COMPONENTS
+   Bundled models and third-party libraries (e.g. Kroko weights, Sherpa-ONNX,
+   Python packages) remain under their own licenses. This file governs the
+   FARTING-WHISPER application code and packaging intent.
+
+If you need a commercial license, contact the authors — default is free and
+non-commercial only.

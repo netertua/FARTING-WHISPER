@@ -1,0 +1,41 @@
+{
+  "asr": {
+    "modelDir": "model/kroko-tr-128l",
+    "sampleRate": 16000,
+    "threads": 3,
+    "provider": "cpu",
+    "providerChain": ["cpu"],
+    "decodingMethod": "greedy_search",
+    "note": "Sherpa pip wheel: cpu only. Vulkan/DML not in this build (falls back). AMD GPU needs custom sherpa+DirectML build."
+  },
+  "streaming": {
+    "decodeIntervalMs": 12,
+    "blocksize": 320,
+    "flushTimeoutS": 20,
+    "preferredMic": "",
+    "autoMicDiscover": true,
+    "note": "Release=stop NEW record only. Flush queue+model until STT done. Stream every word."
+  },
+  "hotkey": {
+    "enableChord": false,
+    "requireAlt": false,
+    "hardwareAliasVk": 122,
+    "hardwareAliasVks": [122],
+    "swallowAlias": true,
+    "note": "F11 hold = STT. Writes to focused/last-click window. Not Grok-only."
+  },
+  "inject": {
+    "liveStream": true,
+    "smartPasteConsole": false,
+    "forceSmartPaste": false,
+    "preferGrok": false,
+    "autoEnter": false,
+    "charDelayMs": 0,
+    "note": "PC-wide: mouse click target or foreground. Never force Grok."
+  },
+  "grok": {
+    "mode": false,
+    "autoFocus": false,
+    "submitOnRelease": false
+  }
+}
