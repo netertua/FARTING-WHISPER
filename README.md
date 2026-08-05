@@ -82,12 +82,24 @@ Tray: show window, restart engine, quit.
 
 ---
 
+## Models (switch / download)
+
+Default: **Turkish 128L** bundled in `model/kroko-tr-128l/`.
+
+In the app UI you can pick another language (EN, DE, FR, ES, IT, PT, …), **Download / Apply**, then the engine restarts on that pack.
+
+- Community catalog page: [Banafo/Kroko-ASR](https://huggingface.co/Banafo/Kroko-ASR) (original Kroko `.data` packs)  
+- This app downloads **Sherpa-ONNX int8** packs (encoder/decoder/joiner/tokens) from  
+  [hudaiapa88/sherpa-stt-onnx](https://huggingface.co/hudaiapa88/sherpa-stt-onnx) — same Kroko Zipformer family, format our CPU runtime can load.  
+- **Refresh list** uses the Hugging Face API to list folders (UVR-style). Offline: built-in catalog still works; download needs internet once.
+
 ## Project layout
 
 ```
 FARTING-WHISPER/
-  app/                  # UI + STT engine + hotkey + inject
-  model/kroko-tr-128l/  # Kroko TR/EN ONNX (int8)
+  app/                  # UI + STT engine + hotkey + inject + model catalog
+  model/kroko-tr-128l/  # default TR 128L ONNX (int8)
+  model/kroko-*-*/      # optional downloads
   config-grok-build.json
   requirements.txt
   run.bat

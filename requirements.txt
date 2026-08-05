@@ -6,3 +6,4 @@ customtkinter>=5.2
 pystray>=0.19
 Pillow>=10.0
 keyboard>=0.13.5
+# Model downloads use stdlib urllib only (no huggingface_hub required)

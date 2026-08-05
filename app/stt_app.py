@@ -76,8 +76,8 @@ class SttTrayApp:
 
         self.root = ctk.CTk()
         self.root.title(APP_NAME)
-        self.root.geometry("460x720")
-        self.root.minsize(400, 640)
+        self.root.geometry("480x780")
+        self.root.minsize(420, 680)
         self.root.configure(fg_color=BG)
         self.root.protocol("WM_DELETE_WINDOW", self._hide_to_tray)
         try:
@@ -89,6 +89,8 @@ class SttTrayApp:
         self._tray = None
         self._tray_thread = None
         self._status = "Loading…"
+        self._model_entries = []
+        self._model_by_label = {}
         self._build_ui()
         self.root.after(200, self._boot_engine)
 
@@ -146,7 +148,70 @@ class SttTrayApp:
             font=ctk.CTkFont(size=12),
             text_color=MUTED,
         )
-        self.lbl_gpu.pack(anchor="w", padx=18, pady=(2, 8))
+        self.lbl_gpu.pack(anchor="w", padx=18, pady=(2, 4))
+
+        # --- Model picker (UVR-style download + switch) ---
+        ctk.CTkLabel(
+            self.card,
+            text="ASR model",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color=ORANGE,
+        ).pack(anchor="w", padx=18, pady=(8, 2))
+        self.lbl_model = ctk.CTkLabel(
+            self.card,
+            text="Model: Turkish 128L (default)",
+            font=ctk.CTkFont(size=12),
+            text_color=MUTED,
+        )
+        self.lbl_model.pack(anchor="w", padx=18, pady=(0, 4))
+        self.cmb_model = ctk.CTkComboBox(
+            self.card,
+            values=["Turkish · 128L (default, bundled)"],
+            width=400,
+            height=32,
+            fg_color="#1E1E1E",
+            border_color=ORANGE_DIM,
+            button_color=ORANGE_DIM,
+            button_hover_color=ORANGE,
+            dropdown_fg_color="#1E1E1E",
+            command=self._on_model_pick,
+        )
+        self.cmb_model.pack(fill="x", padx=18, pady=(0, 4))
+        model_btn = ctk.CTkFrame(self.card, fg_color="transparent")
+        model_btn.pack(fill="x", padx=18, pady=(0, 4))
+        self.btn_model_dl = ctk.CTkButton(
+            model_btn,
+            text="Download / Apply model",
+            fg_color=ORANGE,
+            hover_color=ORANGE_HOVER,
+            text_color="#111",
+            height=32,
+            corner_radius=10,
+            command=self._apply_selected_model,
+        )
+        self.btn_model_dl.pack(side="left", fill="x", expand=True, padx=(0, 6))
+        self.btn_model_refresh = ctk.CTkButton(
+            model_btn,
+            text="Refresh list",
+            fg_color="#333",
+            hover_color="#444",
+            text_color=TEXT,
+            width=110,
+            height=32,
+            corner_radius=10,
+            command=self._refresh_model_list,
+        )
+        self.btn_model_refresh.pack(side="right")
+        self.lbl_model_prog = ctk.CTkLabel(
+            self.card,
+            text="Source: Hugging Face Kroko · sherpa int8 packs",
+            font=ctk.CTkFont(size=11),
+            text_color=MUTED,
+            wraplength=420,
+            justify="left",
+        )
+        self.lbl_model_prog.pack(anchor="w", padx=18, pady=(0, 8))
+        self.root.after(100, self._load_model_combo)
 
         ctk.CTkLabel(self.card, text="Last text", font=ctk.CTkFont(size=12), text_color=MUTED).pack(
             anchor="w", padx=18, pady=(8, 2)
@@ -173,7 +238,7 @@ class SttTrayApp:
         ).pack(anchor="w", padx=18, pady=(4, 2))
         self.txt_about = ctk.CTkTextbox(
             self.card,
-            height=160,
+            height=100,
             fg_color="#1E1E1E",
             text_color=MUTED,
             border_color="#333",
@@ -304,12 +369,155 @@ class SttTrayApp:
         threading.Thread(target=work, daemon=True).start()
         self._start_tray()
 
+    def _load_model_combo(self) -> None:
+        from app.model_catalog import find_by_local_dir, list_catalog
+        from app.stt_core import load_config
+
+        try:
+            entries = list_catalog()
+        except Exception:
+            entries = []
+        self._model_entries = entries
+        labels = []
+        self._model_by_label = {}
+        for m in entries:
+            mark = " ✓" if m.is_installed() else " (download)"
+            lab = f"{m.label}{mark}"
+            labels.append(lab)
+            self._model_by_label[lab] = m
+            self._model_by_label[m.label] = m
+        if not labels:
+            labels = ["Turkish · 128L (default, bundled)"]
+        self.cmb_model.configure(values=labels)
+        # select current from config
+        try:
+            cfg = load_config()
+            rel = (cfg.get("asr") or {}).get("modelDir", "model/kroko-tr-128l")
+            cur = find_by_local_dir(rel)
+            if cur:
+                for lab, ent in self._model_by_label.items():
+                    if ent.id == cur.id and lab in labels:
+                        self.cmb_model.set(lab)
+                        self.lbl_model.configure(
+                            text=f"Model: {cur.label}" + (" · installed" if cur.is_installed() else "")
+                        )
+                        break
+            else:
+                self.cmb_model.set(labels[0])
+        except Exception:
+            self.cmb_model.set(labels[0])
+
+    def _on_model_pick(self, choice: str) -> None:
+        m = self._model_by_label.get(choice)
+        if not m:
+            return
+        st = "installed" if m.is_installed() else "not downloaded (~150 MB)"
+        self.lbl_model.configure(text=f"Model: {m.label} · {st}")
+        self.lbl_model_prog.configure(text=f"Path: {m.local_dir}")
+
+    def _refresh_model_list(self) -> None:
+        self.lbl_model_prog.configure(text="Refreshing list from Hugging Face…")
+
+        def work():
+            try:
+                from app.model_catalog import refresh_catalog_from_hf
+
+                entries = refresh_catalog_from_hf()
+                self._model_entries = entries
+                labels = []
+                self._model_by_label = {}
+                for m in entries:
+                    mark = " ✓" if m.is_installed() else " (download)"
+                    lab = f"{m.label}{mark}"
+                    labels.append(lab)
+                    self._model_by_label[lab] = m
+
+                def ui():
+                    self.cmb_model.configure(values=labels or ["(empty)"])
+                    if labels:
+                        self.cmb_model.set(labels[0])
+                    self.lbl_model_prog.configure(
+                        text=f"Found {len(labels)} models · HF list OK"
+                    )
+
+                self.root.after(0, ui)
+            except Exception as e:
+                self.root.after(
+                    0,
+                    lambda: self.lbl_model_prog.configure(text=f"Refresh failed: {e}"),
+                )
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _apply_selected_model(self) -> None:
+        choice = self.cmb_model.get()
+        m = self._model_by_label.get(choice)
+        if not m:
+            # try strip ✓ / (download)
+            for lab, ent in self._model_by_label.items():
+                if choice.startswith(ent.label):
+                    m = ent
+                    break
+        if not m:
+            self._set_status("Pick a model first", ok=False)
+            return
+        self.btn_model_dl.configure(state="disabled")
+        self._set_status(f"Model: {m.label}…", ok=None)
+
+        def work():
+            try:
+                from app.model_catalog import apply_model_to_config, download_model
+
+                def prog(s: str):
+                    self.root.after(0, lambda t=s: self.lbl_model_prog.configure(text=t))
+
+                if not m.is_installed():
+                    prog("Downloading (~150 MB, needs internet)…")
+                    download_model(m, on_progress=prog)
+                apply_model_to_config(m)
+                self.root.after(
+                    0,
+                    lambda: self.lbl_model.configure(text=f"Model: {m.label} · loading…"),
+                )
+                # unload old engine, load new
+                self.root.after(0, self._restart)
+                self.root.after(
+                    0,
+                    lambda: self.lbl_model_prog.configure(
+                        text=f"Active: {m.local_dir} · engine restarting"
+                    ),
+                )
+            except Exception as e:
+                self.root.after(
+                    0, lambda: self._set_status(f"Model error: {e}", ok=False)
+                )
+                self.root.after(
+                    0, lambda: self.lbl_model_prog.configure(text=f"Failed: {e}")
+                )
+            finally:
+                self.root.after(0, lambda: self.btn_model_dl.configure(state="normal"))
+                self.root.after(500, self._load_model_combo)
+
+        threading.Thread(target=work, daemon=True).start()
+
     def _on_engine_ready(self, core) -> None:
         self.lbl_mic.configure(text=f"Mic: {core.mic_label}")
         self.lbl_hk.configure(text=f"Hotkey: {core.hotkey_label}")
         prov = getattr(core.engine, "provider_used", "cpu")
+        model_name = "Kroko"
+        try:
+            from app.model_catalog import find_by_local_dir
+            from app.stt_core import load_config
+
+            rel = (load_config().get("asr") or {}).get("modelDir", "")
+            ent = find_by_local_dir(rel)
+            if ent:
+                model_name = ent.label
+                self.lbl_model.configure(text=f"Model: {ent.label} · active")
+        except Exception:
+            pass
         self.lbl_gpu.configure(
-            text=f"ASR: {prov.upper()} · Kroko streaming (local Sherpa-ONNX)"
+            text=f"ASR: {prov.upper()} · {model_name}"
         )
         self._set_status("Ready — hold F11", ok=True)
         try:
