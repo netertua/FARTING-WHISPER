@@ -354,19 +354,8 @@ class KrokoEngine:
         if not self._on_text:
             return
         try:
-            # kelime kelime (space); yoksa parca aninda
-            if " " in delta:
-                lead, s = "", delta
-                if s.startswith(" "):
-                    lead, s = " ", s.lstrip(" ")
-                for i, w in enumerate(s.split(" ")):
-                    piece = (lead + w) if i == 0 else (" " + w)
-                    lead = ""
-                    if piece:
-                        self._on_text(piece)
-                        time.sleep(0.008)
-            else:
-                self._on_text(delta)
+            # Hand full delta to injector; char_delay_ms paces keystrokes (typewriter).
+            self._on_text(delta)
         except Exception:
             life_exc("emit")
 
